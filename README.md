@@ -2,9 +2,9 @@
  
 Simple JS that pulls user reviews from GiantBomb API and saves as csv.
 
-##Todos
+## Todos
  - Add genres.
  - Maybe add franchise.
  
- ##Credit
+## Credit
 https://www.giantbomb.com/
