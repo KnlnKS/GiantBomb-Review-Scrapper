@@ -4,10 +4,25 @@ import APIKEY from "./secret.js";
 
 const FORMAT = "format=json";
 const OFFSET = "offset=";
+const URL = "https://www.giantbomb.com/api/user_reviews/?";
+const DATASIZE = 300
+const DELAY = 2000
+const SETTINGS = { method: "Get" };
 
-var url = "https://www.giantbomb.com/api/user_reviews/?";
-var settings = { method: "Get" };
-var entries = [];
+
+
+var csvWriter = createCsvWriter.createObjectCsvWriter({
+  path: "./export/reviewData.csv",
+  header: [
+    { id: "user", title: "user" },
+    { id: "gameID", title: "game_id" },
+    { id: "gameURL", title: "game_url" },
+    { id: "gameName", title: "game_name" },
+    { id: "score", title: "score" },
+    { id: "dateAdded", title: "date_added" },
+    { id: "dateUpdated", title: "date_updated" },
+  ],
+});
 
 function checkValid(json, key) {
   if (json != undefined) return key in json;
@@ -19,8 +34,10 @@ function sleep(ms) {
 }
 
 async function getDatasets() {
-  for (var i = 0; i < 1000; i++) {
-    fetch(url + APIKEY + "&" + FORMAT + "&" + OFFSET + (i * 100), settings)
+  for (var i = 0; i < DATASIZE; i++) {
+    var entries = [];
+
+    fetch(URL + APIKEY + "&" + FORMAT + "&" + OFFSET + (i * 100), SETTINGS)
       .then((res) => res.json())
       .then((json) => {
         json.results.forEach((review) => {
@@ -41,25 +58,13 @@ async function getDatasets() {
           });
         });
 
-        var csvWriter = createCsvWriter.createObjectCsvWriter({
-          path: "./export/reviewData" + i + ".csv",
-          header: [
-            { id: "user", title: "user" },
-            { id: "gameID", title: "game_id" },
-            { id: "gameURL", title: "game_url" },
-            { id: "gameName", title: "game_name" },
-            { id: "score", title: "score" },
-            { id: "dateAdded", title: "date_added" },
-            { id: "dateUpdated", title: "date_updated" },
-          ],
-        });
-
         csvWriter.writeRecords(entries).then(() => {
-          console.log("Dataset " + i + " complete!");
+          if (entries.length>10) console.log((i*100 + 100)+" entries read.");
+          else break;
         });
       });
 
-    await sleep(2000);
+    await sleep(DELAY);
   }
 }
 
