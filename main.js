@@ -1,15 +1,14 @@
 import fetch from "node-fetch";
 import createCsvWriter from "csv-writer";
-import APIKEY from "./secret.js";
+import key from "./secret.js";
 
+const APIKEY = 'api_key='+key
 const FORMAT = "format=json";
 const OFFSET = "offset=";
 const URL = "https://www.giantbomb.com/api/user_reviews/?";
-const DATASIZE = 300
-const DELAY = 2000
+const DATASIZE = 300;
+const DELAY = 2000;
 const SETTINGS = { method: "Get" };
-
-
 
 var csvWriter = createCsvWriter.createObjectCsvWriter({
   path: "./export/reviewData.csv",
@@ -37,7 +36,7 @@ async function getDatasets() {
   for (var i = 0; i < DATASIZE; i++) {
     var entries = [];
 
-    fetch(URL + APIKEY + "&" + FORMAT + "&" + OFFSET + (i * 100), SETTINGS)
+    fetch(URL + APIKEY + "&" + FORMAT + "&" + OFFSET + i * 100, SETTINGS)
       .then((res) => res.json())
       .then((json) => {
         json.results.forEach((review) => {
@@ -59,7 +58,8 @@ async function getDatasets() {
         });
 
         csvWriter.writeRecords(entries).then(() => {
-          if (entries.length>10) console.log((i*100 + 100)+" entries read.");
+          if (entries.length > 10)
+            console.log(i * 100 + 100 + " entries read.");
           else break;
         });
       });
@@ -68,7 +68,4 @@ async function getDatasets() {
   }
 }
 
-
 getDatasets();
-
-
